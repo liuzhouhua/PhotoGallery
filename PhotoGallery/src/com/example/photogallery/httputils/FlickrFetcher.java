@@ -14,7 +14,7 @@ public class FlickrFetcher {
 	private static final String TAG = "FlickrFetcher";
 	
 	//访问端点
-	private static final String ENDPOINT = "http://api.flickr.com/services/rest/";
+	private static final String ENDPOINT = "https://api.flickr.com/services/rest/";
 	//API Key
 	private static final String API_KEY = "a94fbb36986ad8cd98867d5a3090a5b5";
 	//方法名
