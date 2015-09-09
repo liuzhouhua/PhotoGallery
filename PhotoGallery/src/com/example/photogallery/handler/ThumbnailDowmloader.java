@@ -26,8 +26,9 @@ public class ThumbnailDowmloader<Token> extends HandlerThread {
 	//同步HashMap
 	Map<Token, String> requsetMap = Collections.synchronizedMap(new HashMap<Token, String>());
 
-	public ThumbnailDowmloader() {
+	public ThumbnailDowmloader(Handler responseHandler) {
 		super(TAG);
+		mResponseHandler = responseHandler;
 	}
 
 	public interface Listener<Token>{
@@ -71,9 +72,25 @@ public class ThumbnailDowmloader<Token> extends HandlerThread {
 			byte[] bitmapBytes = new FlickrFetcher().getUrlBytes(url);
 			final Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
 			Log.i(TAG, "Bitmap created");
+			//返回订制的message给主线程
+			mResponseHandler.post(new Runnable() {
+				
+				@Override
+				public void run() {
+					if(requsetMap.get(token)!=url){
+						return;
+					}
+					requsetMap.remove(token);
+					mListener.onThumbnailDownloaded(token, bitmap);
+				}
+			});
 		}catch(IOException e){
-			Log.e(TAG, "Error downloading image", e);
+			Log.e(TAG, "Error downloading image", e);//
 		}
 	}
 
+	public void clearQueue(){
+		mHandler.removeMessages(MESSAGE_DOWNLOAD);
+		requsetMap.clear();
+	}
 }

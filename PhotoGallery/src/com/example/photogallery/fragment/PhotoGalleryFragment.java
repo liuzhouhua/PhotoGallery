@@ -5,12 +5,15 @@ import java.util.ArrayList;
 
 import com.example.photogallery.R;
 import com.example.photogallery.handler.ThumbnailDowmloader;
+import com.example.photogallery.handler.ThumbnailDowmloader.Listener;
 import com.example.photogallery.httputils.FlickrFetcher;
 import com.example.photogallery.model.GalleryItem;
 
 import android.database.DataSetObserver;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -35,7 +38,17 @@ public class PhotoGalleryFragment extends Fragment {
 		setRetainInstance(true);
 		new FetchItemsTask().execute();
 		
-		mThumbnailThread = new ThumbnailDowmloader<ImageView>();
+		mThumbnailThread = new ThumbnailDowmloader<ImageView>(new Handler());
+		mThumbnailThread.setListener(new Listener<ImageView>() {
+
+			@Override
+			public void onThumbnailDownloaded(ImageView imageView, Bitmap thumbnail) {
+				if(isVisible()){
+					imageView.setImageBitmap(thumbnail);
+				}
+			}
+			
+		});
 		mThumbnailThread.start();
 		mThumbnailThread.getLooper();
 		Log.i(TAG, "Background thread is started");
@@ -56,6 +69,12 @@ public class PhotoGalleryFragment extends Fragment {
 		super.onDestroy();
 		mThumbnailThread.quit();
 		Log.i(TAG, "Background thread destroyed");
+	}
+	
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		mThumbnailThread.clearQueue();
 	}
 	
 	private void setupAdapter() {
