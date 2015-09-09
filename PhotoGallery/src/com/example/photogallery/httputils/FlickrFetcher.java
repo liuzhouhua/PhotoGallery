@@ -34,7 +34,7 @@ public class FlickrFetcher {
 	private static final String XML_PHOTO = "photo";
 
 
-	byte[] getUrlBytes(String urlSpec) throws IOException{
+	public byte[] getUrlBytes(String urlSpec) throws IOException{
 		URL url = new URL(urlSpec);
 		HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
 		
